@@ -1,16 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+'''
+
+'''
 
 import os, sys, re, shutil, shelve 
 import urllib.parse
 import ftplib, ftputil
-import logging
 
-logging.basicConfig(filename='log.txt', 
-        level=logging.DEBUG,
-        format='%(asctime)s - %(levelname)s - %(message)s')
-# logging.disable(logging.CRITICAL)
-logging.debug('Start of program')
+# import logging
+# logging.basicConfig(filename='log.txt', 
+#         level=logging.DEBUG,
+#         format='%(asctime)s - %(levelname)s - %(message)s')
+# # logging.disable(logging.CRITICAL)
+# logging.debug('Start of program')
 
 
 def parser(string):
@@ -46,32 +49,35 @@ def getList():
     server = '172.21.200.32'
     user   = 'churui@ctecdcs.net'
     password = '`1234qwert'
-    userMatch = re.compile(r'(\w\d)+@')
-    urls = {'guidelines': '/00.部门文件/01.技术文件/00.标准化文件/04.五组标准化文件/广利核 安全级系统设计流程及规范/操作指导/', 
-            'templates': '/00.部门文件/01.技术文件/00.标准化文件/04.五组标准化文件/广利核 安全级系统设计流程及规范/模板表格/', 
-            'procedures': '/00.部门文件/01.技术文件/00.标准化文件/04.五组标准化文件/广利核 安全级系统设计流程及规范/设计规范/'}
-    catagories = {'guidelines': '操作指导', 
-            'templates': '模板表格', 
-            'procedures': '设计流程'}
+    # userMatch = re.compile(r'(\w\d)+@')
+    urls = [
+            r'/01.项目文件/00.CPR1000项目/00.CPR1000 PROJECT A/00_收发文件/SDM-ANE/000001-099999'
+    ]
+
+    # catagories = {'guidelines': '操作指导', 
+    #         'templates': '模板表格', 
+    #         'procedures': '设计流程'}
 
     with ftputil.FTPHost(server, user, password) as host:
         with open('result.txt', 'w') as f:
-            for key in urls.keys():
-                catagory = catagories[key]
-                files = host.listdir(urls[key].encode('gbk').decode('latin1'))
+            for url in urls:
+                # catagory = catagories[key]
+                files = host.listdir(url.encode('gbk'))
 
                 for file in files:
-                    fileName = file.encode('latin1').decode('gbk')
+                    fileName = file.decode('gbk')
                     try:
-                        code, ver, title = parser(fileName)
-                        fullUrl = host.path.join(protocol, server, urls[key].strip('/'), fileName)
-                        f.write(code + ',' + ver + ',' + title + ',' + catagory + ',' + urllib.parse.quote(fullUrl, safe='/:', encoding='gbk') + '\n')
-                    except TypeError as e:
-                        print(e)
+                        # code, ver, title = parser(fileName)
+                        fullUrl = host.path.join(protocol, server, url.strip('/'), fileName)
+                        f.write(fileName + ',' + urllib.parse.quote(fullUrl, safe='/:', encoding='gbk') + '\n')
+                    except:
+                        # print(fullUrl)
+                        pass
+                    # finally:
+                    #     f.write(file + '\n');
+                        
 
     # TODO: What will happen if the server is not reachable?
     # TODO: What will happen if the user is not exist? or the password is not correct?
-
-logging.debug('End of program')
 
 getList()
